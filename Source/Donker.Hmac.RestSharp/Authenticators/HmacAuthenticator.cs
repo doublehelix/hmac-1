@@ -8,6 +8,7 @@ using Donker.Hmac.RestSharp.Signing;
 using Donker.Hmac.Signing;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Serialization.Json;
 
 namespace Donker.Hmac.RestSharp.Authenticators
 {
@@ -107,20 +108,26 @@ namespace Donker.Hmac.RestSharp.Authenticators
         /// <returns>The request body as a <see cref="byte"/> array if found; otherwise <c>null</c>.</returns>
         protected virtual byte[] GetBodyBytes(IRestClient client, IRestRequest request)
         {
-            byte[] bodyBytes = null;
-            
-            Parameter bodyParameter = request.Parameters.GetBodyParameter(client.DefaultParameters);
+            var bodyText = request.Body?.Value?.ToString();
 
-            if (bodyParameter != null)
+            if (string.IsNullOrEmpty(bodyText))
             {
-                bodyBytes = bodyParameter.Value as byte[];
+                Parameter bodyParameter = request.Parameters.GetBodyParameter(client.DefaultParameters);
 
-                if (bodyBytes == null)
+                if (bodyParameter != null)
                 {
-                    Encoding encoding = client.Encoding ?? Encoding.UTF8;
-                    string body = Convert.ToString(bodyParameter.Value);
-                    bodyBytes = encoding.GetBytes(body);
+                    var serializer = new JsonSerializer();
+                    bodyText = serializer.Serialize(bodyParameter.Value);
                 }
+            }
+
+            byte[] bodyBytes = null;
+
+            if (!string.IsNullOrEmpty(bodyText))
+            {
+                Encoding encoding = client.Encoding ?? Encoding.UTF8;
+                string body = Convert.ToString(bodyText);
+                bodyBytes = encoding.GetBytes(body);
             }
 
             return bodyBytes;

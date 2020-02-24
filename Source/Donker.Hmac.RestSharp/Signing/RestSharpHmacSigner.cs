@@ -73,7 +73,7 @@ namespace Donker.Hmac.RestSharp.Signing
             Parameter bodyParameter = request.Parameters.GetBodyParameter(client.DefaultParameters);
             if (bodyParameter != null)
             {
-                signatureData.ContentType = bodyParameter.Name;
+                signatureData.ContentType = !string.IsNullOrEmpty(bodyParameter.ContentType) ? bodyParameter.ContentType : bodyParameter.Name;
 
                 // Get content MD5 if configured
                 if (HmacConfiguration.ValidateContentMd5)
