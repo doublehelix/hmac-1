@@ -7,7 +7,7 @@ using Donker.Hmac.RestSharp.Authenticators;
 using Donker.Hmac.RestSharp.Signing;
 using Donker.Hmac.Signing;
 using RestSharp;
-using RestSharp.Deserializers;
+using RestSharp.Serialization.Json;
 
 namespace Donker.Hmac.ExampleClient
 {
@@ -27,7 +27,7 @@ namespace Donker.Hmac.ExampleClient
 
             // Setup the RestSharp client
             IRestClient client = new RestClient(serverBaseUrl);
-            client.AddHandler("application/json", new JsonDeserializer());
+            client.AddHandler("application/json", () => new JsonDeserializer());
             client.Authenticator = new HmacAuthenticator(configuration, signer);
             client.AddDefaultHeader("X-Custom-Header", "Knock knock...");
 
